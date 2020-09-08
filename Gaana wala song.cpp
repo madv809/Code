@@ -37,6 +37,6 @@ int main()
         }
     }
     ans = INF;
-    for (int j = 0; j < ans; ++j) if ((vist[n][j] == 1) && (max(j, dp[n][j]) < ans)) ans = max(j, dp[n][j]);
+    for (int j = 0; j < ans; ++j) if ((vist[n][j]) && (max(j, dp[n][j]) < ans)) ans = max(j, dp[n][j]);
     printf("%d", ans);
 }
