@@ -1,4 +1,5 @@
 #define LL long long
+#define FOR(i, a, b) for (int i = a; i <= b; ++i)
 #include <iostream>
 #include <algorithm>
 #include <sstream>
@@ -7,39 +8,39 @@
 #include <ctime>
 #include <vector>
 #include <math.h>
-
+ 
 using namespace std;
-const LL INF = 100000000000009;
-pair <int, int> a[200001];
-int n;
-
-bool cmp (pair <int, int> a, pair <int, int> b)
+int vist[101], Assigned[101], m, n, t;
+vector <int> a[101];
+ 
+bool go (int u)
 {
-    return (atan2(a.first, a.second) < atan2(b.first, b.second));
+    if (vist[u] == t) return 0;
+    vist[u] = t;
+    FOR(i, 0, (a[u].size() - 1))
+    {
+        int v = a[u][i];
+        if (!Assigned[v] || go(Assigned[v]))
+        {
+            Assigned[v] = u;
+            return 1;
+        }
+    }
+    return 0;
 }
-
+ 
 int main()
 {
     //freopen("D:\\test.txt", "r", stdin);
     //freopen("D:\\test2.txt", "w", stdout);
-    scanf("%d", &n);
-    for (int i = 0; i < n; ++i) scanf("%d%d", &a[i].first, &a[i].second);
-    sort(a, a + n, cmp);
-    LL sumx, sumy, ans, res = -INF;
-    for (int i = 1; i <= n; ++i)
+    scanf("%d%d", &m, &n);
+    int u, v, c = 0;
+    while (scanf("%d%d", &u, &v) > 0) a[u].push_back(v);
+    FOR(i, 1, m)
     {
-        sumx = 0; sumy = 0, ans = -INF;
-        for (int j = 0; j < n; ++j)
-        {
-            sumx += a[(i + j)%n].first;
-            sumy += a[(i + j)%n].second;
-            if (sumx*sumx + sumy*sumy >= ans) ans = sumx*sumx + sumy*sumy;
-            else
-            {
-                res = max(res, ans);
-                break;
-            }
-        }
+        ++t;
+        c += go(i);
     }
-    printf("%lli", res);
+    printf("%d\n", c);
+    FOR(i, 1, n) if (Assigned[i]) printf("%d %d\n", Assigned[i], i);
 }
