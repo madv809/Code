@@ -1,46 +1,91 @@
 #define LL long long
-#define FOR(i, a, b) for (int i = a; i <= b; ++i)
+#define FOR(i, a, b) for (int i = a; i < b; ++i)
+#define REP(i, a, b) for (int i = a; i <= b; ++i)
+#define X first
+#define Y second
 #include <iostream>
+#include <stdio.h>
 #include <algorithm>
-#include <sstream>
-#include <cstring>
-#include <sstream>
-#include <ctime>
 #include <vector>
+#include <set>
+#include <cstring>
 #include <math.h>
- 
+#include <iomanip>
+
 using namespace std;
-int vist[101], Assigned[101], m, n, t;
-vector <int> a[101];
- 
-bool go (int u)
+const int INF = 1000000009;
+int dp[201][201], c[201], parr[201], n, p, tmp, best = -INF;
+vector <int> a[201];
+bool ch[201];
+pair <int, int> trace[201][201];
+
+void go (int par, int u)
 {
-    if (vist[u] == t) return 0;
-    vist[u] = t;
-    FOR(i, 0, (a[u].size() - 1))
+    dp[u][1] = c[u];
+
+    for (int v : a[u]) if (v != par)
     {
-        int v = a[u][i];
-        if (!Assigned[v] || go(Assigned[v]))
+        parr[v] = u;
+        go(u, v);
+        for (int j = p; j >= 2; --j)
+            for (int k = 1; k <= j - 1; ++k)
+            {
+                if (dp[u][j] < dp[v][k] + dp[u][j - k])
+                {
+                    dp[u][j] = dp[v][k] + dp[u][j - k];
+                    trace[u][j] = make_pair(v, k);
+                }
+            }
+    }
+}
+
+void load()
+{
+    scanf("%d%d", &n, &p);
+    REP(i, 1, n) scanf("%d", &c[i]);
+    int u, v;
+    FOR(i, 1, n)
+    {
+        scanf("%d%d", &u, &v);
+        a[u].push_back(v);
+        a[v].push_back(u);
+    }
+
+    REP(i, 1, n)
+        REP(j, 2, p) dp[i][j] = -INF;
+
+    go(0, 1);
+    //int best = -INF;//, tmp = 0;
+    REP(i, 1, n)
+    {
+        if (best < dp[i][p])
         {
-            Assigned[v] = u;
-            return 1;
+            best = dp[i][p];
+            tmp = i;
         }
     }
-    return 0;
+
+    ch[tmp] = 1;
 }
- 
+
+void goFinal (int par, int u, int c)
+{
+    if (c == 0) return;
+    ch[u] = 1;
+    if (c == 1) return;
+    goFinal(u, trace[u][c].X, trace[u][c].Y);
+    goFinal(par, u, c - trace[u][c].Y);
+}
+
 int main()
 {
     //freopen("D:\\test.txt", "r", stdin);
     //freopen("D:\\test2.txt", "w", stdout);
-    scanf("%d%d", &m, &n);
-    int u, v, c = 0;
-    while (scanf("%d%d", &u, &v) > 0) a[u].push_back(v);
-    FOR(i, 1, m)
-    {
-        ++t;
-        c += go(i);
-    }
-    printf("%d\n", c);
-    FOR(i, 1, n) if (Assigned[i]) printf("%d %d\n", Assigned[i], i);
+    load();
+    printf("%d\n", best);
+    int sum = 0;
+    goFinal(parr[tmp], tmp, p);
+    REP(i, 1, n) if (ch[i]) {printf("%d ", i); sum += c[i];}
+    cout << endl;
+    cout << sum;
 }
