@@ -19,26 +19,6 @@ vector <int> a[201];
 bool ch[201];
 pair <int, int> trace[201][201];
 
-void go (int par, int u)
-{
-    dp[u][1] = c[u];
-
-    for (int v : a[u]) if (v != par)
-    {
-        parr[v] = u;
-        go(u, v);
-        for (int j = p; j >= 2; --j)
-            for (int k = 1; k <= j - 1; ++k)
-            {
-                if (dp[u][j] < dp[v][k] + dp[u][j - k])
-                {
-                    dp[u][j] = dp[v][k] + dp[u][j - k];
-                    trace[u][j] = make_pair(v, k);
-                }
-            }
-    }
-}
-
 void load()
 {
     scanf("%d%d", &n, &p);
@@ -64,8 +44,26 @@ void load()
             tmp = i;
         }
     }
+}
 
-    ch[tmp] = 1;
+void go (int par, int u)
+{
+    dp[u][1] = c[u];
+
+    for (int v : a[u]) if (v != par)
+    {
+        parr[v] = u;
+        go(u, v);
+        for (int j = p; j >= 2; --j)
+            for (int k = 1; k <= j - 1; ++k)
+            {
+                if (dp[u][j] < dp[v][k] + dp[u][j - k])
+                {
+                    dp[u][j] = dp[v][k] + dp[u][j - k];
+                    trace[u][j] = make_pair(v, k);
+                }
+            }
+    }
 }
 
 void goFinal (int par, int u, int c)
