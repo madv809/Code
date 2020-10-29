@@ -14,13 +14,43 @@
 
 using namespace std;
 const int INF = 1000000009;
-int dp[201][201], c[201], parr[201], n, p, tmp, best = -INF;
+int dp[201][201], c[201], n, p;
 vector <int> a[201];
 bool ch[201];
 pair <int, int> trace[201][201];
 
-void load()
+void go (int par, int u)
 {
+    dp[u][1] = c[u];
+
+    for (int v : a[u]) if (v != par)
+    {
+        go(u, v);
+        for (int j = p; j >= 2; --j)
+            for (int k = 1; k <= j - 1; ++k)
+            {
+                if (dp[u][j] < dp[v][k] + dp[u][j - k])
+                {
+                    dp[u][j] = dp[v][k] + dp[u][j - k];
+                    trace[u][j] = make_pair(v, k);
+                }
+            }
+    }
+}
+
+void goFinal (int u, int c)
+{
+    if (c == 0) return;
+    ch[u] = 1;
+    if (c == 1) return;
+    goFinal(trace[u][c].X, trace[u][c].Y);
+    goFinal(u, c - trace[u][c].Y);
+}
+
+int main()
+{
+    //freopen("D:\\test.txt", "r", stdin);
+    //freopen("D:\\test2.txt", "w", stdout);
     scanf("%d%d", &n, &p);
     REP(i, 1, n) scanf("%d", &c[i]);
     int u, v;
@@ -35,7 +65,7 @@ void load()
         REP(j, 2, p) dp[i][j] = -INF;
 
     go(0, 1);
-    //int best = -INF;//, tmp = 0;
+    int best = -INF, tmp = 0;
     REP(i, 1, n)
     {
         if (best < dp[i][p])
@@ -44,45 +74,10 @@ void load()
             tmp = i;
         }
     }
-}
 
-void go (int par, int u)
-{
-    dp[u][1] = c[u];
-
-    for (int v : a[u]) if (v != par)
-    {
-        parr[v] = u;
-        go(u, v);
-        for (int j = p; j >= 2; --j)
-            for (int k = 1; k <= j - 1; ++k)
-            {
-                if (dp[u][j] < dp[v][k] + dp[u][j - k])
-                {
-                    dp[u][j] = dp[v][k] + dp[u][j - k];
-                    trace[u][j] = make_pair(v, k);
-                }
-            }
-    }
-}
-
-void goFinal (int par, int u, int c)
-{
-    if (c == 0) return;
-    ch[u] = 1;
-    if (c == 1) return;
-    goFinal(u, trace[u][c].X, trace[u][c].Y);
-    goFinal(par, u, c - trace[u][c].Y);
-}
-
-int main()
-{
-    //freopen("D:\\test.txt", "r", stdin);
-    //freopen("D:\\test2.txt", "w", stdout);
-    load();
     printf("%d\n", best);
     int sum = 0;
-    goFinal(parr[tmp], tmp, p);
+    goFinal(tmp, p);
     REP(i, 1, n) if (ch[i]) {printf("%d ", i); sum += c[i];}
     cout << endl;
     cout << sum;
