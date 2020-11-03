@@ -11,74 +11,81 @@
 #include <cstring>
 #include <math.h>
 #include <iomanip>
-
+ 
 using namespace std;
-const int INF = 1000000009;
-int dp[201][201], c[201], n, p;
-vector <int> a[201];
-bool ch[201];
-pair <int, int> trace[201][201];
-
-void go (int par, int u)
+int q[30005], s[30001], n, m;
+vector <int> a[30001];
+vector <LL> c[30001];
+LL d1[30001], d2[30001], f1[30001], f2[30001];
+bool inq[30001];
+ 
+void BF (LL d[], LL f[], int s)
 {
-    dp[u][1] = c[u];
-
-    for (int v : a[u]) if (v != par)
+    REP(i, 1, n) d[i] = 9999999999;
+    memset(inq, 0, sizeof(inq));
+ 
+    q[0] = s;
+    d[s] = 0;
+    f[s] = 1;
+ 
+    int x = 0, y = 0;
+ 
+    while (x != (y + 1)%n)
     {
-        go(u, v);
-        for (int j = p; j >= 2; --j)
-            for (int k = 1; k <= j - 1; ++k)
+        int u = q[x];
+        x = (x + 1)%n;
+        inq[u] = 0;
+ 
+        for (LL i = 0; i < a[u].size(); ++i)
+        {
+            int v = a[u][i];
+ 
+            if (d[v] > d[u] + c[u][i])
             {
-                if (dp[u][j] < dp[v][k] + dp[u][j - k])
+                d[v] = d[u] + c[u][i];
+                f[v] = f[u];
+                if (!inq[v])
                 {
-                    dp[u][j] = dp[v][k] + dp[u][j - k];
-                    trace[u][j] = make_pair(v, k);
+                    y = (y + 1)%n;
+                    q[y] = v;
+                    inq[v] = 1;
                 }
             }
+            else if (d[v] == d[u] + c[u][i])
+                f[v] += f[u];
+        }
     }
 }
-
-void goFinal (int u, int c)
-{
-    if (c == 0) return;
-    ch[u] = 1;
-    if (c == 1) return;
-    goFinal(trace[u][c].X, trace[u][c].Y);
-    goFinal(u, c - trace[u][c].Y);
-}
-
+ 
 int main()
 {
     //freopen("D:\\test.txt", "r", stdin);
     //freopen("D:\\test2.txt", "w", stdout);
-    scanf("%d%d", &n, &p);
-    REP(i, 1, n) scanf("%d", &c[i]);
-    int u, v;
-    FOR(i, 1, n)
+    scanf("%d%d", &n, &m);
+    int u, v; LL w;
+    REP(i, 1, m)
     {
-        scanf("%d%d", &u, &v);
+        scanf("%d%d%lli", &u, &v, &w);
         a[u].push_back(v);
         a[v].push_back(u);
+        c[u].push_back(w);
+        c[v].push_back(w);
     }
-
-    REP(i, 1, n)
-        REP(j, 2, p) dp[i][j] = -INF;
-
-    go(0, 1);
-    int best = -INF, tmp = 0;
-    REP(i, 1, n)
+    BF(d1, f1, 1);
+    BF(d2, f2, n);
+ 
+    int res = n - 2;
+    FOR(i, 2, n) if (d1[i] + d2[i] == d1[n] && f1[i]*f2[i] == f1[n])
     {
-        if (best < dp[i][p])
-        {
-            best = dp[i][p];
-            tmp = i;
-        }
+        --res;
+        s[i] = 1;
     }
-
-    printf("%d\n", best);
-    int sum = 0;
-    goFinal(tmp, p);
-    REP(i, 1, n) if (ch[i]) {printf("%d ", i); sum += c[i];}
+ 
+    printf("%d\n", res);
+    FOR(i, 2, n) if (!s[i]) printf("%d\n", i);
+    /*REP(i, 1, n) cout << d1[i] << ' ';
     cout << endl;
-    cout << sum;
+    REP(i, 1, n) cout << d2[i] << ' ';
+    cout << endl;
+    REP(i, 1, n) cout << f1[i] << ' ';*/
 }
