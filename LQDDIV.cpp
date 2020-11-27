@@ -1,8 +1,3 @@
-#define LL long long
-#define FOR(i, a, b) for (int i = a; i < b; ++i)
-#define REP(i, a, b) for (int i = a; i <= b; ++i)
-#define X first
-#define Y second
 #include <iostream>
 #include <stdio.h>
 #include <algorithm>
@@ -11,78 +6,51 @@
 #include <cstring>
 #include <math.h>
 #include <iomanip>
-
+#include <queue>
+#include <map>
+ 
+#define LL long long
+#define FOR(i, a, b) for (int i = a; i < b; ++i)
+#define REP(i, a, b) for (int i = a; i <= b; ++i)
+#define X first
+#define Y second
+#define pb(a) push_back(a);
+#define pii pair<int, int>
+#define pLi pair<LL, int>
+#define piL pair<int, LL>
+#define pLL pair<LL, LL>
+#define ar array
+ 
 using namespace std;
-int c, n;
-LL res[(1 << 17)], cres[(1 << 17)], a1[50], a2[50], best = 999999999999, nres, sum;
-
-int findd (LL tmp)
-{
-    int l = 1, r = c, mid;
-
-    while (l < r)
-    {
-        mid = (l + r)>>1;
-        if (sum - 2*(tmp + res[mid]) <= 0) r = mid;
-        else l = mid + 1;
-    }
-
-    return l;
-}
-
-void up (int x, LL tmp)
-{
-    if (x <= 0) return;
-    LL xx = abs(sum - 2*(tmp + res[x]));
-    if (best > xx)
-    {
-        best = xx;
-        nres = 1;
-    }
-    else if (best == xx) nres += cres[x];
-}
-
+ 
+const int mxn = 1e5+1;
+vector<LL> d[mxn];
+vector<int> a[mxn], s;
+vector<LL> c[mxn];
+ 
 int main()
 {
     //freopen("D:\\test.txt", "r", stdin);
     //freopen("D:\\test2.txt", "w", stdout);
-    scanf("%d", &n);
-    int n1 = n/2;
-    int n2 = n - n1;
-    FOR(i, 0, n1) {scanf("%lli", &a1[i]); sum += a1[i];}
-    FOR(i, 0, n2) {scanf("%lli", &a2[i]); sum += a2[i];}
-
-    for (int i = 0; i < (1 << n1); ++i)
+    int n, m, k; cin >> n >> m >> k; int u, v; LL w;
+    REP(i, 1, m)
     {
-        LL tmp = 0;
-        for (int j = 0; j < n1; ++j)
-            if (i&(1 << j)) tmp += a1[j];
-        res[++c] = tmp;
+        cin >> u >> v >> w;
+        a[u].pb(v); c[u].push_back(w);
     }
-
-    sort(res + 1, res + c + 1);
-    int c1 = c;
-    c = 1; cres[1] = 1;
-    for (int i = 2; i <= c1; ++i)
+ 
+    priority_queue<pLi, vector<piL>, greater<pLi>> h;
+    h.push({0, 1});
+    while (h.size())
     {
-        if (res[i] != res[i - 1])
+        u = h.top().Y; w = h.top().X; h.pop();
+        if (d[u].size()>=k) continue;
+        d[u].push_back(w);
+        for (int i = 0; i < a[u].size(); ++i)
         {
-            res[++c] = res[i];
-            cres[c] = 1;
+            v = a[u][i];
+            h.push({w + c[u][i], v});
         }
-        else if (res[i] == res[i - 1]) ++cres[c];
     }
-
-    for (int i = 0; i < (1 << n2); ++i)
-    {
-        LL tmp = 0;
-        for (int j = 0; j < n2; ++j)
-            if (i&(1 << j)) tmp += a2[j];
-
-        int x = findd(tmp);
-        up(x, tmp);
-        up(x - 1, tmp);
-    }
-
-    printf("%lli %lli", best, nres/2);
+    for (int i = 0; i < k; ++i) cout << d[n][i] << ' ';
 }
