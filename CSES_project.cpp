@@ -98,7 +98,7 @@ iostream &operator >> (iostream &cin, big &A)
     for (int i = 0; i < k; ++i)
     {
         int x = (k - i - 1)/4;
-        A[x] = A[x]*10 + 1;
+        A[x] = A[x]*10 + (s[i] - '0');
     }
     A.normalize();
     return cin;
