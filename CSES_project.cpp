@@ -22,55 +22,124 @@
 #define ar array
 
 using namespace std;
+const LL MOD = 1e9+7; const int BASE = 1e4;
+struct big
+{
+    int a[2304]; int n;
+    int &operator [] (int i) {return a[i];}
+    const int &operator [] (int i) const {return a[i];}
+    void resize (int x) {n = x; FOR(i, 0, n) a[i] = 0;}
+    void trim () {while (n > 1 && a[n-1] == 0) --n;}
+    void normalize()
+    {
+        for (int i = 0; i < n - 1; ++i)
+        {
+            a[i + 1] += a[i]/BASE;
+            a[i] %= BASE;
+        }
+        trim();
+    }
+    void operator = (const int &x)
+    {
+        n = 1;
+        a[0] = x;
+    }
+    void operator = (const big &A)
+    {
+        n = A.n;
+        for (int i = 0; i < n; ++i) a[i] = A[i];
+    }
+};
 
-const int mxn = 1e5+1;
-vector<LL> d[mxn];
-vector<int> a[mxn], s;
-vector<LL> c[mxn];
+big operator + (const big &A, const big &B)
+{
+    big R;
+    if (A.n >= B.n)
+    {
+        R = A; ++R.n;
+        for (int i = 0; i < B.n; ++i) R[i] += B[i];
+    }
+    else
+    {
+        R = B; ++R.n;
+        for (int i = 0; i < A.n; ++i) R[i] += A[i];
+    }
+    R.normalize();
+    return R;
+}
 
+big operator * (const big &A, const big &B)
+{
+    big R; R.resize(A.n + B.n);
+    for (int i = 0; i < A.n; ++i)
+        for (int j = 0; j < B.n; ++j)
+        {
+            R[i + j] += A[i]*B[j];
+            R[i + j + 1] += R[i + j]/BASE;
+            R[i + j]%=BASE;
+        }
+    R.normalize();
+    return R;
+}
+
+big operator * (const big &A, const int &x)
+{
+    big R; R.resize(A.n + 1);
+    for (int i = 0; i < A.n; ++i) R[i] = A[i]*x;
+    R.normalize();
+    return R;
+}
+
+iostream &operator >> (iostream &cin, big &A)
+{
+    string s;
+    cin >> s; int k = s.length();
+    A.resize(k/4 + 1);
+    for (int i = 0; i < k; ++i)
+    {
+        int x = (k - i - 1)/4;
+        A[x] = A[x]*10 + 1;
+    }
+    A.normalize();
+    return cin;
+}
+
+ostream &operator << (ostream &cout, const big &A)
+{
+    printf("%d",A[A.n - 1]);
+    for (int i = A.n - 2; i >= 0; --i) printf("%04d", A[i]);
+    return cout;
+}
+
+big f[10001], g[10001];
 int main()
 {
     //freopen("D:\\test.txt", "r", stdin);
     //freopen("D:\\test2.txt", "w", stdout);
-    int n, m, k; cin >> n >> m >> k; int u, v; LL w;
-    REP(i, 1, m)
+    string s; getline(cin,s); s = '@'+s;
+    f[0] = 1; g[0] = 1;
+    for (int i = 1; i < s.length(); ++i)
     {
-        cin >> u >> v >> w;
-        a[u].pb(v); c[u].push_back(w);
-    }
-
-    priority_queue<ar<LL, 2>, vector<ar<LL, 2> >, greater<ar<LL, 2>>> h;
-    h.push({0, 1});
-    while (h.size())
-    {
-        u = h.top()[1]; w = h.top()[0]; h.pop();
-        if (d[u].size()>=k) continue;
-        d[u].push_back(w);
-        for (int i = 0; i < a[u].size(); ++i)
+        if (s[i] == '*')
         {
-            v = a[u][i];
-            h.push({w + c[u][i], v});
+            g[i] = g[i-1]*3;
+            f[i] = f[i-1]*5 + g[i-1];
+        }
+        else if (s[i] == 'L')
+        {
+            g[i] = g[i-1];
+            f[i] = f[i-1]*2;
+        }
+        else if (s[i] == 'R')
+        {
+            g[i] = g[i-1];                             // L *  R
+            f[i] = f[i-1]*2 + g[i-1];                  // 2 12
+        }                                              // 1 3
+        else
+        {
+            f[i] = f[i-1];
+            g[i] = g[i-1];
         }
     }
-    for (int i = 0; i < k; ++i) cout << d[n][i] << ' ';
+    cout << f[s.length()-1];
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
